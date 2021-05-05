@@ -100,6 +100,13 @@ discovery_list = { }
 
 MACRONAME = DISCITEM.upcase
 
+def name_name(url)
+  filetmp = url.gsub("||","__")
+  filefin = filetmp.gsub("%23","-")
+  filename=filefin.split("/")[-1]
+  return filename
+end
+
 def file_name(url)
   filetmp = url.gsub("||","__")
   filefin = filetmp.gsub("%23","-")
@@ -120,10 +127,11 @@ if TYPE == "A"
 elsif TYPE == "B"
   list['Members'].each do |system|
     filemacro = file_name(system['@odata.id'])
+    namemacro = name_name(system['@odata.id'])
     if discovery_list["data"]
-      discovery_list["data"].push({ "{##{MACRONAME}}" => system['@odata.id'] , "{#FILENAME}" => filemacro })
+      discovery_list["data"].push({ "{##{MACRONAME}}" => system['@odata.id'] , "{#FILENAME}" => filemacro , "{#NAME}" => namemacro })
     else
-      discovery_list = { "data" => [ "{##{MACRONAME}}" => system['@odata.id'] , "{#FILENAME}" => filemacro ] }
+      discovery_list = { "data" => [ "{##{MACRONAME}}" => system['@odata.id'] , "{#FILENAME}" => filemacro , "{#NAME}" => namemacro ] }
     end
   end
 elsif TYPE == "C"
@@ -188,10 +196,11 @@ elsif TYPE == "E"
 elsif TYPE == "F"
   list['Members'].each do |system|
     filemacro = file_name(system['@odata.id'])
+    namemacro = name_name(system['@odata.id'])
     if discovery_list["data"]
-      discovery_list["data"].push({ "{##{MACRONAME}}" => system['@odata.id'] , "{#FILENAME}" => filemacro })
+      discovery_list["data"].push({ "{##{MACRONAME}}" => system['@odata.id'] , "{#FILENAME}" => filemacro , "{#NAME}" => namemacro })
     else
-      discovery_list = { "data" => [ "{##{MACRONAME}}" => system['@odata.id'] , "{#FILENAME}" => filemacro ] }
+      discovery_list = { "data" => [ "{##{MACRONAME}}" => system['@odata.id'] , "{#FILENAME}" => filemacro , "{#NAME}" => namemacro ] }
     end
   end
 end

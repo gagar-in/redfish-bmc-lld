@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>5.0</version>
-    <date>2021-03-31T14:58:16Z</date>
+    <date>2021-05-05T14:32:45Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -11,6 +11,11 @@
         <template>
             <template>Template Hw Gagarin Redfish LLD</template>
             <name>Template Hw Gagarin Redfish LLD</name>
+            <templates>
+                <template>
+                    <name>Template Module ICMP Ping</name>
+                </template>
+            </templates>
             <groups>
                 <group>
                     <name>Templates</name>
@@ -43,8 +48,7 @@
                 <item>
                     <name>Collect Power Info</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-collect[{$USER},{$PASSWORD},{$IPMI},/redfish/v1/Chassis/{$CHASSIS}/Power]</key>
-                    <delay>5m</delay>
+                    <key>redfish-collect[{$USER},{$PASSWORD},{HOST.IP},/redfish/v1/Chassis/{$CHASSIS}/Power]</key>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <applications>
@@ -56,8 +60,7 @@
                 <item>
                     <name>Collect Thermal Info</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-collect[{$USER},{$PASSWORD},{$IPMI},/redfish/v1/Chassis/{$CHASSIS}/Thermal]</key>
-                    <delay>5m</delay>
+                    <key>redfish-collect[{$USER},{$PASSWORD},{HOST.IP},/redfish/v1/Chassis/{$CHASSIS}/Thermal]</key>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <applications>
@@ -69,8 +72,8 @@
                 <item>
                     <name>Collect Generic Systems Info</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-collect[{$USER},{$PASSWORD},{$IPMI},/redfish/v1/Systems/{$SYSTEM}]</key>
-                    <delay>5m</delay>
+                    <key>redfish-collect[{$USER},{$PASSWORD},{HOST.IP},/redfish/v1/Systems/{$SYSTEM}]</key>
+                    <delay>30m</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <applications>
@@ -82,7 +85,7 @@
                 <item>
                     <name>Manufacturer</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,Manufacturer]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,Manufacturer]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -95,7 +98,7 @@
                 <item>
                     <name>Memory Health RollUp Summary</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,MemorySummary.Status.HealthRollup]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,MemorySummary.Status.HealthRollup]</key>
                     <delay>5m</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -108,7 +111,7 @@
                 <item>
                     <name>Memory Health Summary</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,MemorySummary.Status.Health]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,MemorySummary.Status.Health]</key>
                     <delay>5m</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -119,7 +122,7 @@
                     </applications>
                     <triggers>
                         <trigger>
-                            <expression>({iregexp(OK)}=0) and ({iregexp(null)}=0 and {iregexp(no batch file yet)}=0)</expression>
+                            <expression>({iregexp(OK,#3)}=0) and ({iregexp(null,#3)}=0 and {iregexp(no batch file yet,#3)}=0)</expression>
                             <name>{HOST.NAME} Memory Health is {ITEM.LASTVALUE}</name>
                             <priority>HIGH</priority>
                         </trigger>
@@ -128,7 +131,7 @@
                 <item>
                     <name>Amount of Physical Memory</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,MemorySummary.TotalSystemMemoryGiB]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,MemorySummary.TotalSystemMemoryGiB]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -141,7 +144,7 @@
                 <item>
                     <name>Server Model</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,Model]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,Model]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -154,7 +157,7 @@
                 <item>
                     <name>Part Number</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,PartNumber]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,PartNumber]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -167,7 +170,7 @@
                 <item>
                     <name>Power State</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,PowerState]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,PowerState]</key>
                     <delay>5m</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -182,12 +185,17 @@
                             <name>{HOST.NAME} Indicating is powered off</name>
                             <priority>HIGH</priority>
                         </trigger>
+                        <trigger>
+                            <expression>({iregexp(On)}=0) and ({iregexp(null,#3)}=0 and {iregexp(no batch file yet,#3)}=0 and {str(0)}=0)</expression>
+                            <name>{HOST.NAME} Indicating is powered off</name>
+                            <priority>HIGH</priority>
+                        </trigger>
                     </triggers>
                 </item>
                 <item>
                     <name>Amount of Processors</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,ProcessorSummary.Count]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,ProcessorSummary.Count]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -200,7 +208,7 @@
                 <item>
                     <name>Processor Model</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,ProcessorSummary.Model]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,ProcessorSummary.Model]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -213,7 +221,7 @@
                 <item>
                     <name>Processor Health Summary</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,ProcessorSummary.Status.Health]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,ProcessorSummary.Status.Health]</key>
                     <delay>5m</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -228,12 +236,17 @@
                             <name>{HOST.NAME} Processor Summary Health is {ITEM.LASTVALUE}</name>
                             <priority>HIGH</priority>
                         </trigger>
+                        <trigger>
+                            <expression>({iregexp(OK,#3)}=0) and ({iregexp(null,#3)}=0 and {iregexp(no batch file yet,#3)}=0)</expression>
+                            <name>{HOST.NAME} Processor Summary Health is {ITEM.LASTVALUE}</name>
+                            <priority>HIGH</priority>
+                        </trigger>
                     </triggers>
                 </item>
                 <item>
                     <name>Serial Number</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,SerialNumber]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,SerialNumber]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -246,7 +259,7 @@
                 <item>
                     <name>Overall Hardware Health Summary</name>
                     <type>EXTERNAL</type>
-                    <key>redfish-reader[{$IPMI}-{$SYSTEM}.json,Status.Health]</key>
+                    <key>redfish-reader[{HOST.IP}-{$SYSTEM}.json,Status.Health]</key>
                     <delay>5m</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -261,6 +274,11 @@
                             <name>{HOST.NAME} Overall Server Status is {ITEM.LASTVALUE}</name>
                             <priority>HIGH</priority>
                         </trigger>
+                        <trigger>
+                            <expression>({iregexp(OK,#3)}=0) and ({iregexp(null,#3)}=0 and {iregexp(no batch file yet,#3)}=0)</expression>
+                            <name>{HOST.NAME} Overall Server Status is {ITEM.LASTVALUE}</name>
+                            <priority>HIGH</priority>
+                        </trigger>
                     </triggers>
                 </item>
             </items>
@@ -268,13 +286,15 @@
                 <discovery_rule>
                     <name>Fans</name>
                     <type>EXTERNAL</type>
-                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{$IPMI},Fans]</key>
+                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{HOST.IP},Fans]</key>
                     <delay>5m</delay>
+                    <lifetime>1h</lifetime>
                     <item_prototypes>
                         <item_prototype>
-                            <name>Fans {#NAME} $4 {$IPMI}</name>
+                            <name>Fans, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Thermal.json,Fans,{#NAME},LowerThresholdCritical,{#THERMAL}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},LowerThresholdCritical,{#THERMAL}]</key>
+                            <delay>1h</delay>
                             <units>RPM</units>
                             <applications>
                                 <application>
@@ -283,9 +303,9 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Fans {#NAME} $4 {$IPMI}</name>
+                            <name>Fans, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Thermal.json,Fans,{#NAME},Reading,{#THERMAL}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},Reading,{#THERMAL}]</key>
                             <units>RPM</units>
                             <applications>
                                 <application>
@@ -294,9 +314,9 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Fans {#NAME} $4 {$IPMI}</name>
+                            <name>Fans, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Thermal.json,Fans,{#NAME},Status.Health,{#THERMAL}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},Status.Health,{#THERMAL}]</key>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -306,16 +326,18 @@
                             </applications>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{iregexp(OK)}=0 and {iregexp(no batch file yet)}=0 and {iregexp(null)}=0</expression>
+                                    <expression>{iregexp(OK,#3)}=0 and {iregexp(no batch file yet,#3)}=0 and {iregexp(null,#3)}=0</expression>
                                     <name>Fan {#NAME} is not Healthy</name>
+                                    <status>DISABLED</status>
                                     <priority>DISASTER</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Fans {#NAME} $4 {$IPMI}</name>
+                            <name>Fans, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Thermal.json,Fans,{#NAME},UpperThresholdCritical,{#THERMAL}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},UpperThresholdNonCritical,{#THERMAL}]</key>
+                            <delay>1h</delay>
                             <units>RPM</units>
                             <applications>
                                 <application>
@@ -324,16 +346,28 @@
                             </applications>
                         </item_prototype>
                     </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},Reading,{#THERMAL}].last()}&gt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},UpperThresholdNonCritical,{#THERMAL}].last()} and {Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},UpperThresholdNonCritical,{#THERMAL}].last()}&gt;0</expression>
+                            <name>Fan {#NAME} RPM is high at {ITEM.LASTVALUE}</name>
+                            <priority>WARNING</priority>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},Reading,{#THERMAL}].last()}&lt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},LowerThresholdCritical,{#THERMAL}].last()} and {Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},LowerThresholdCritical,{#THERMAL}].last()}&gt;0</expression>
+                            <name>Fan {#NAME} RPM is low at {ITEM.LASTVALUE}</name>
+                            <priority>WARNING</priority>
+                        </trigger_prototype>
+                    </trigger_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
-                            <name>Fans {#NAME} {#FANS}</name>
+                            <name>Fans, {#NAME}</name>
                             <graph_items>
                                 <graph_item>
                                     <sortorder>1</sortorder>
                                     <color>1A7C11</color>
                                     <item>
                                         <host>Template Hw Gagarin Redfish LLD</host>
-                                        <key>g-redfish-reader[{$IPMI}-Thermal.json,Fans,{#NAME},LowerThresholdCritical,{#THERMAL}]</key>
+                                        <key>g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},LowerThresholdCritical,{#THERMAL}]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -341,7 +375,7 @@
                                     <color>F63100</color>
                                     <item>
                                         <host>Template Hw Gagarin Redfish LLD</host>
-                                        <key>g-redfish-reader[{$IPMI}-Thermal.json,Fans,{#NAME},Reading,{#THERMAL}]</key>
+                                        <key>g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},Reading,{#THERMAL}]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -349,7 +383,7 @@
                                     <color>2774A4</color>
                                     <item>
                                         <host>Template Hw Gagarin Redfish LLD</host>
-                                        <key>g-redfish-reader[{$IPMI}-Thermal.json,Fans,{#NAME},UpperThresholdCritical,{#THERMAL}]</key>
+                                        <key>g-redfish-reader[{HOST.IP}-Thermal.json,Fans,{#NAME},UpperThresholdNonCritical,{#THERMAL}]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
@@ -359,14 +393,14 @@
                 <discovery_rule>
                     <name>Memory</name>
                     <type>EXTERNAL</type>
-                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{$IPMI},Memory]</key>
+                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{HOST.IP},Memory]</key>
                     <delay>5m</delay>
+                    <lifetime>1h</lifetime>
                     <item_prototypes>
                         <item_prototype>
                             <name>Collect Memory Data {#FILENAME}</name>
                             <type>EXTERNAL</type>
-                            <key>redfish-collect[{$USER},{$PASSWORD},{$IPMI},{#MEMORY}]</key>
-                            <delay>5m</delay>
+                            <key>redfish-collect[{$USER},{$PASSWORD},{HOST.IP},{#MEMORY}]</key>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -376,10 +410,12 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Memory {#FILENAME} $2</name>
+                            <name>Memory, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
-                            <key>redfish-reader[{#FILENAME},Capacity,{#MEMORY}]</key>
-                            <delay>5m</delay>
+                            <key>redfish-reader[{#FILENAME},BaseModuleType,{#MEMORY}]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
                             <applications>
                                 <application>
                                     <name>Redfish Memory Information</name>
@@ -387,10 +423,59 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Memory {#FILENAME} $2</name>
+                            <name>Memory, {#NAME}, $2</name>
+                            <type>EXTERNAL</type>
+                            <key>redfish-reader[{#FILENAME},CapacityMiB,{#MEMORY}]</key>
+                            <delay>1h</delay>
+                            <applications>
+                                <application>
+                                    <name>Redfish Memory Information</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Memory, {#NAME}, $2</name>
+                            <type>EXTERNAL</type>
+                            <key>redfish-reader[{#FILENAME},DataWidthBits,{#MEMORY}]</key>
+                            <delay>1h</delay>
+                            <units>bits</units>
+                            <applications>
+                                <application>
+                                    <name>Redfish Memory Information</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Memory, {#NAME}, $2</name>
+                            <type>EXTERNAL</type>
+                            <key>redfish-reader[{#FILENAME},ErrorCorrection,{#MEMORY}]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Redfish Memory Information</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Memory, {#NAME}, $2</name>
+                            <type>EXTERNAL</type>
+                            <key>redfish-reader[{#FILENAME},Id,{#MEMORY}]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Redfish Memory Information</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Memory, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Manufacturer,{#MEMORY}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -400,10 +485,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Memory {#FILENAME} $2</name>
+                            <name>Memory, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},MemoryDeviceType,{#MEMORY}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -413,10 +498,23 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Memory {#FILENAME} $2</name>
+                            <name>Memory, {#NAME}, $2</name>
+                            <type>EXTERNAL</type>
+                            <key>redfish-reader[{#FILENAME},MemoryType,{#MEMORY}]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Redfish Memory Information</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Memory, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Name,{#MEMORY}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -426,10 +524,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Memory {#FILENAME} $2</name>
+                            <name>Memory, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},OperatingSpeedMhz,{#MEMORY}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <units>MHz</units>
                             <applications>
                                 <application>
@@ -438,10 +536,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Memory {#FILENAME} $2</name>
+                            <name>Memory, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},PartNumber,{#MEMORY}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -451,10 +549,22 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Memory {#FILENAME} $2</name>
+                            <name>Memory, {#NAME}, $2</name>
+                            <type>EXTERNAL</type>
+                            <key>redfish-reader[{#FILENAME},SerialNumber,{#MEMORY}]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Redfish Memory Information</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Memory, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Status.Health,{#MEMORY}]</key>
-                            <delay>5m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -464,17 +574,17 @@
                             </applications>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{iregexp(no batch file yet)}=0 and {iregexp(OK)}=0 and {iregexp(null)}=0</expression>
+                                    <expression>{iregexp(no batch file yet,#3)}=0 and {iregexp(OK,#3)}=0 and {iregexp(null,#3)}=0</expression>
                                     <name>Memory {#FILENAME} is not Healthy</name>
+                                    <status>DISABLED</status>
                                     <priority>DISASTER</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Memory {#FILENAME} $2</name>
+                            <name>Memory, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Status.State,{#MEMORY}]</key>
-                            <delay>5m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -488,13 +598,15 @@
                 <discovery_rule>
                     <name>Power</name>
                     <type>EXTERNAL</type>
-                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{$IPMI},Power]</key>
+                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{HOST.IP},Power]</key>
                     <delay>5m</delay>
+                    <lifetime>1h</lifetime>
                     <item_prototypes>
                         <item_prototype>
-                            <name>Power {#NAME} $4 {$IPMI}</name>
+                            <name>Power, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},LowerThresholdCritical,{#POWER}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},LowerThresholdCritical,{#POWER}]</key>
+                            <delay>1h</delay>
                             <value_type>FLOAT</value_type>
                             <units>Volts</units>
                             <applications>
@@ -504,9 +616,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Power {#NAME} $4 {$IPMI}</name>
+                            <name>Power, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},LowerThresholdNonCritical,{#POWER}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},LowerThresholdNonCritical,{#POWER}]</key>
+                            <delay>1h</delay>
                             <value_type>FLOAT</value_type>
                             <units>Volts</units>
                             <applications>
@@ -516,9 +629,9 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Power {#NAME} $4 {$IPMI}</name>
+                            <name>Power, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}]</key>
                             <value_type>FLOAT</value_type>
                             <units>Volts</units>
                             <applications>
@@ -528,9 +641,9 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Power {#NAME} $4 {$IPMI}</name>
+                            <name>Power, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},Status.Health,{#POWER}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},Status.Health,{#POWER}]</key>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -540,16 +653,18 @@
                             </applications>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{iregexp(OK)}=0 and {iregexp(null)}=0 and {iregexp(no batch file yet)}=0</expression>
+                                    <expression>{iregexp(OK,#3)}=0 and {iregexp(null,#3)}=0 and {iregexp(no batch file yet,#3)}=0 and {iregexp(0,#3)}=0</expression>
                                     <name>Power {#NAME} is not Healthy</name>
+                                    <status>DISABLED</status>
                                     <priority>DISASTER</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Power {#NAME} $4 {$IPMI}</name>
+                            <name>Power, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},UpperThresholdCritical,{#POWER}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},UpperThresholdCritical,{#POWER}]</key>
+                            <delay>1h</delay>
                             <value_type>FLOAT</value_type>
                             <units>Volts</units>
                             <applications>
@@ -561,31 +676,32 @@
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}].last()}&gt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},UpperThresholdCritical,{#POWER}].last()}</expression>
+                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}].last()}&gt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},UpperThresholdCritical,{#POWER}].last()} and {Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},UpperThresholdCritical,{#POWER}].last()}&gt;0</expression>
                             <name>Voltage {#NAME} is extremely high at {ITEM.LASTVALUE}</name>
                             <priority>HIGH</priority>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}].last()}&lt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},LowerThresholdCritical,{#POWER}].last()}</expression>
+                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}].last()}&lt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},LowerThresholdCritical,{#POWER}].last()} and {Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},LowerThresholdCritical,{#POWER}].last()}&gt;0</expression>
                             <name>Voltage {#NAME} is extremely low at {ITEM.LASTVALUE}</name>
+                            <status>DISABLED</status>
                             <priority>HIGH</priority>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}].last()}&lt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},LowerThresholdNonCritical,{#POWER}].last()}</expression>
+                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}].last()}&lt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},LowerThresholdNonCritical,{#POWER}].last()} and {Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},LowerThresholdNonCritical,{#POWER}].last()}&gt;0</expression>
                             <name>Voltage {#NAME} is pretty low at {ITEM.LASTVALUE}</name>
                             <priority>WARNING</priority>
                         </trigger_prototype>
                     </trigger_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
-                            <name>Power {#NAME} {#POWER}</name>
+                            <name>Power, {#NAME}</name>
                             <graph_items>
                                 <graph_item>
                                     <sortorder>1</sortorder>
                                     <color>1A7C11</color>
                                     <item>
                                         <host>Template Hw Gagarin Redfish LLD</host>
-                                        <key>g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},LowerThresholdCritical,{#POWER}]</key>
+                                        <key>g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},LowerThresholdCritical,{#POWER}]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -593,7 +709,7 @@
                                     <color>F63100</color>
                                     <item>
                                         <host>Template Hw Gagarin Redfish LLD</host>
-                                        <key>g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}]</key>
+                                        <key>g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},ReadingVolts,{#POWER}]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -601,7 +717,7 @@
                                     <color>2774A4</color>
                                     <item>
                                         <host>Template Hw Gagarin Redfish LLD</host>
-                                        <key>g-redfish-reader[{$IPMI}-Power.json,Voltages,{#NAME},UpperThresholdCritical,{#POWER}]</key>
+                                        <key>g-redfish-reader[{HOST.IP}-Power.json,Voltages,{#NAME},UpperThresholdCritical,{#POWER}]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
@@ -611,14 +727,14 @@
                 <discovery_rule>
                     <name>Processors</name>
                     <type>EXTERNAL</type>
-                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{$IPMI},Processors]</key>
+                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{HOST.IP},Processors]</key>
                     <delay>5m</delay>
+                    <lifetime>1h</lifetime>
                     <item_prototypes>
                         <item_prototype>
                             <name>Collect Processors Data {#FILENAME}</name>
                             <type>EXTERNAL</type>
-                            <key>redfish-collect[{$USER},{$PASSWORD},{$IPMI},{#PROCESSORS}]</key>
-                            <delay>15m</delay>
+                            <key>redfish-collect[{$USER},{$PASSWORD},{HOST.IP},{#PROCESSORS}]</key>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -628,10 +744,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},InstructionSet,{#PROCESSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -641,10 +757,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Manufacturer,{#PROCESSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -654,10 +770,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},MaxSpeedMHz,{#PROCESSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <units>MHz</units>
                             <applications>
                                 <application>
@@ -666,7 +782,7 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Model,{#PROCESSORS}]</key>
                             <delay>1h</delay>
@@ -679,10 +795,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Name,{#PROCESSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -692,10 +808,9 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Status.Health,{#PROCESSORS}]</key>
-                            <delay>15m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -705,17 +820,17 @@
                             </applications>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{iregexp(OK)}=0 and {iregexp(null)}=0 and {iregexp(no batch file yet)}=0</expression>
+                                    <expression>{iregexp(OK,#3)}=0 and {iregexp(null,#3)}=0 and {iregexp(no batch file yet,#3)}=0</expression>
                                     <name>Processor {#FILENAME} is not Healthy</name>
+                                    <status>DISABLED</status>
                                     <priority>DISASTER</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Status.State,{#PROCESSORS}]</key>
-                            <delay>5m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -725,10 +840,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},TotalCores,{#PROCESSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <applications>
                                 <application>
                                     <name>Redfish Processors Information</name>
@@ -736,10 +851,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Processor {#FILENAME} $2</name>
+                            <name>Processor, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},TotalThreads,{#PROCESSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <applications>
                                 <application>
                                     <name>Redfish Processors Information</name>
@@ -749,7 +864,7 @@
                     </item_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
-                            <name>CPU {#FILENAME} Cores/Threads</name>
+                            <name>CPUs, {#NAME}, Cores/Threads</name>
                             <graph_items>
                                 <graph_item>
                                     <sortorder>1</sortorder>
@@ -774,14 +889,14 @@
                 <discovery_rule>
                     <name>Sensors</name>
                     <type>EXTERNAL</type>
-                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{$IPMI},Sensors]</key>
+                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{HOST.IP},Sensors]</key>
                     <delay>5m</delay>
+                    <lifetime>1h</lifetime>
                     <item_prototypes>
                         <item_prototype>
                             <name>Collect Sensors Data {#FILENAME}</name>
                             <type>EXTERNAL</type>
-                            <key>redfish-collect[{$USER},{$PASSWORD},{$IPMI},{#SENSORS}]</key>
-                            <delay>5m</delay>
+                            <key>redfish-collect[{$USER},{$PASSWORD},{HOST.IP},{#SENSORS}]</key>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -791,10 +906,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Sensors {#FILENAME} $2</name>
+                            <name>Sensors, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Name,{#SENSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -804,10 +919,9 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Sensors {#FILENAME} $2</name>
+                            <name>Sensors, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Reading,{#SENSORS}]</key>
-                            <delay>5m</delay>
                             <value_type>FLOAT</value_type>
                             <applications>
                                 <application>
@@ -816,10 +930,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Sensors {#FILENAME} $2</name>
+                            <name>Sensors, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},ReadingUnits,{#SENSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -829,10 +943,9 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Sensors {#FILENAME} $2</name>
+                            <name>Sensors, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Status.Health,{#SENSORS}]</key>
-                            <delay>5m</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -842,17 +955,30 @@
                             </applications>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{iregexp(no batch file yet)}=0 and {iregexp(null)}=0 and {iregexp(OK)}=0</expression>
+                                    <expression>{iregexp(no batch file yet,#3)}=0 and {iregexp(null,#3)}=0 and {iregexp(OK,#3)}=0</expression>
                                     <name>Sensor {#FILENAME} is not Healthy</name>
+                                    <status>DISABLED</status>
                                     <priority>DISASTER</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Sensors {#FILENAME} $2</name>
+                            <name>Sensors, {#NAME}, $2</name>
+                            <type>EXTERNAL</type>
+                            <key>redfish-reader[{#FILENAME},Thresholds.UpperCaution.Reading,{#SENSORS}]</key>
+                            <delay>1h</delay>
+                            <value_type>FLOAT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Redfish Sensors Information</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Sensors, {#NAME}, $2</name>
                             <type>EXTERNAL</type>
                             <key>redfish-reader[{#FILENAME},Thresholds.UpperCritical.Reading,{#SENSORS}]</key>
-                            <delay>5m</delay>
+                            <delay>1h</delay>
                             <value_type>FLOAT</value_type>
                             <applications>
                                 <application>
@@ -863,7 +989,7 @@
                     </item_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
-                            <name>Sensor {#FILENAME} {#SENSORS}</name>
+                            <name>Sensor, {#NAME}</name>
                             <graph_items>
                                 <graph_item>
                                     <sortorder>1</sortorder>
@@ -880,13 +1006,15 @@
                 <discovery_rule>
                     <name>Temperatures</name>
                     <type>EXTERNAL</type>
-                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{$IPMI},Temperatures]</key>
+                    <key>g-redfish-lld[{$TYPE},{$USER},{$PASSWORD},{HOST.IP},Temperatures]</key>
                     <delay>5m</delay>
+                    <lifetime>1h</lifetime>
                     <item_prototypes>
                         <item_prototype>
-                            <name>Temperatures {#NAME} $4 {$IPMI}</name>
+                            <name>Temperatures, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},ReadingCelsius,{#THERMAL}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},ReadingCelsius,{#THERMAL}]</key>
+                            <value_type>FLOAT</value_type>
                             <units>C</units>
                             <applications>
                                 <application>
@@ -895,9 +1023,9 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Temperatures {#NAME} $4 {$IPMI}</name>
+                            <name>Temperatures, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},Status.Health,{#THERMAL}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},Status.Health,{#THERMAL}]</key>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <applications>
@@ -907,16 +1035,18 @@
                             </applications>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{iregexp(OK)}=0 and {iregexp(no batch file yet)}=0 and {iregexp(null)}=0</expression>
+                                    <expression>{iregexp(OK,#3)}=0 and {iregexp(no batch file yet,#3)}=0 and {iregexp(null,#3)}=0</expression>
                                     <name>Temperature {#NAME} is not Healthy</name>
+                                    <status>DISABLED</status>
                                     <priority>DISASTER</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
-                            <name>Temperatures {#NAME} $4 {$IPMI}</name>
+                            <name>Temperatures, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},UpperThresholdCritical,{#THERMAL}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},UpperThresholdCritical,{#THERMAL}]</key>
+                            <delay>1h</delay>
                             <units>C</units>
                             <applications>
                                 <application>
@@ -925,9 +1055,10 @@
                             </applications>
                         </item_prototype>
                         <item_prototype>
-                            <name>Temperatures {#NAME} $4 {$IPMI}</name>
+                            <name>Temperatures, {#NAME}, $4</name>
                             <type>EXTERNAL</type>
-                            <key>g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},UpperThresholdNonCritical,{#THERMAL}]</key>
+                            <key>g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},UpperThresholdNonCritical,{#THERMAL}]</key>
+                            <delay>1h</delay>
                             <units>C</units>
                             <applications>
                                 <application>
@@ -938,26 +1069,26 @@
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},ReadingCelsius,{#THERMAL}].last()}&gt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},UpperThresholdCritical,{#THERMAL}].last()}</expression>
+                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},ReadingCelsius,{#THERMAL}].last()}&gt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},UpperThresholdCritical,{#THERMAL}].last()} and {Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},UpperThresholdCritical,{#THERMAL}].last()}&gt;0</expression>
                             <name>Temperature {#NAME} is extremely high at {ITEM.LASTVALUE}</name>
                             <priority>HIGH</priority>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},ReadingCelsius,{#THERMAL}].last()}&gt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},UpperThresholdNonCritical,{#THERMAL}].last()}</expression>
+                            <expression>{Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},ReadingCelsius,{#THERMAL}].last()}&gt;={Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},UpperThresholdNonCritical,{#THERMAL}].last()} and {Template Hw Gagarin Redfish LLD:g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},UpperThresholdNonCritical,{#THERMAL}].last()}&gt;0</expression>
                             <name>Temperature {#NAME} is pretty high at {ITEM.LASTVALUE}</name>
                             <priority>AVERAGE</priority>
                         </trigger_prototype>
                     </trigger_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
-                            <name>Temperatures {#NAME} {#TEMPERATURES}</name>
+                            <name>Temperatures, {#NAME}</name>
                             <graph_items>
                                 <graph_item>
                                     <sortorder>1</sortorder>
                                     <color>1A7C11</color>
                                     <item>
                                         <host>Template Hw Gagarin Redfish LLD</host>
-                                        <key>g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},ReadingCelsius,{#THERMAL}]</key>
+                                        <key>g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},ReadingCelsius,{#THERMAL}]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -965,7 +1096,15 @@
                                     <color>F63100</color>
                                     <item>
                                         <host>Template Hw Gagarin Redfish LLD</host>
-                                        <key>g-redfish-reader[{$IPMI}-Thermal.json,Temperatures,{#NAME},UpperThresholdCritical,{#THERMAL}]</key>
+                                        <key>g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},UpperThresholdCritical,{#THERMAL}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>3</sortorder>
+                                    <color>2774A4</color>
+                                    <item>
+                                        <host>Template Hw Gagarin Redfish LLD</host>
+                                        <key>g-redfish-reader[{HOST.IP}-Thermal.json,Temperatures,{#NAME},UpperThresholdNonCritical,{#THERMAL}]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
@@ -998,4 +1137,3 @@
         </template>
     </templates>
 </zabbix_export>
-
