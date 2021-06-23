@@ -1,5 +1,5 @@
-## Redfish monitoring framewrk for MegaRAC SP-X and Phoenix ServerBMC™
-The package contains few scripts capable for low-level discovery of the major system parameters and adding neccessary items and graphs into Zabbix. At the moment it can handle the following Redfish schema sections: **Processors, Memory, Sensors, Temperatures, Fans, Power**
+## Redfish monitoring framewrk for MegaRAC SP-X and Phoenix ServerBMC
+The package contains few scripts capable for low-level discovery of the major system parameters and adding neccessary items and graphs into Zabbix. At the moment it can handle the following Redfish schema sections: **Processors, Memory, Storage, Sensors, Temperatures, Fans, Power**
 
 Built on Ruby and bash. The template is proved to work with Zabbix 5.x.x
 
